@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Aces Up - Omar H 2025</title>
+    <script defer src="card-v2.js"></script>
+    <script defer src="deck-v2.js"></script>
+    <script defer src="acesup.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="gameboard">
+
+    <header id="header">
+        <div id="header-left">
+            <button id="newgame-btn">New Game</button>
+            <button id="hint-btn">Hint</button>
+            <button id="undo-btn">Undo</button>
+            <button id="redo-btn">Redo</button>
+        </div>
+        <div id="header-right">
+            <div class="info-box" id="moves">Moves: 0</div>
+            <div class="info-box" id="timer">Time: 0s</div>
+        </div>
+    </header>
+
+    <div id="game-area">
+        <div id="tableau">
+            <div class="stack" id="stack-1"></div>
+            <div class="stack" id="stack-2"></div>
+            <div class="stack" id="stack-3"></div>
+            <div class="stack" id="stack-4"></div>
+        </div>
+        <div id="stock">
+            <div id="stockpile">Stock</div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

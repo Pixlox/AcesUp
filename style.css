@@ -1,0 +1,81 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+body {
+    background: url("assets/bg.png") center center no-repeat;
+    background-size: cover;
+}
+
+#game-area {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 40px;
+}
+
+#tableau {
+    display: flex;
+    flex-direction: row;
+    gap: 32px;
+    margin: 40px 0 0 0;
+}
+
+.stack {
+    position: relative;
+    width: 80px;
+    height: 350px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.card {
+    position: absolute;
+    left: 0;
+    width: 80px;
+    height: auto;
+    max-width: 100%;
+    display: block;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    border-radius: 8px;
+    transition: top 0.2s;
+    z-index: 1;
+}
+
+#stock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: 40px;
+}
+
+#stockpile {
+    width: 80px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-top: 40px;
+    position: relative;
+}
+
+#stockpile img {
+    width: 80px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+#stockpile.empty {
+    background: rgba(255,255,255,0.2);
+    color: #333;
+    font-weight: bold;
+    font-size: 1.1em;
+}
