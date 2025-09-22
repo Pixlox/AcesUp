@@ -5,9 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1d5cd4ec-a06e-4532-b805-a72cab74ec4f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/acesup.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cardgame.html" beforeDir="false" afterPath="$PROJECT_DIR$/cardgame.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/style.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../JS/ReviewQ.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../JS/batteries.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../JS/batteryProgram_nov.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../JS/canvas.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../JS/colour_sliders.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../JS/learning_example3.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../JS/race_vehicles.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../holiday hw/linkedlist.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/acesup.js" beforeDir="false" afterPath="$PROJECT_DIR$/acesup.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,18 +34,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "Pixlox"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Pixlox&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Pixlox/AcesUp.git",
-    "accountId": "9fd5f570-2a22-4666-a26d-f5e5b9979636"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:Pixlox/SEN11-Answers.git&quot;,
+    &quot;accountId&quot;: &quot;9fd5f570-2a22-4666-a26d-f5e5b9979636&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 3
 }</component>
@@ -49,22 +55,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true",
-    "list.type.of.created.stylesheet": "CSS",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.lookFeel",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
@@ -111,7 +117,8 @@
       <workItem from="1756546269797" duration="3308000" />
       <workItem from="1756850878364" duration="1888000" />
       <workItem from="1757329727580" duration="607000" />
-      <workItem from="1758287167157" duration="12698000" />
+      <workItem from="1758287167157" duration="18452000" />
+      <workItem from="1758539921146" duration="8854000" />
     </task>
     <servers />
   </component>

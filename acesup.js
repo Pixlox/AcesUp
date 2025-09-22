@@ -1,6 +1,9 @@
 class Tableau {
     constructor(numStacks = 4) {
-        this.stacks = Array.from({ length: numStacks }, () => []);
+        this.stacks = [];
+        for (let i = 0; i < numStacks; i++) {
+            this.stacks[i] = [];
+        }
     }
 
     addCardToStack(stackIndex, card) {
@@ -16,33 +19,10 @@ class Tableau {
     }
 }
 
-class Stock {
-    constructor(cards = []) {
-        this.cards = cards;
-    }
-
-    dealOne() {
-        return this.cards.shift();
-    }
-
-    isEmpty() {
-        return this.cards.length === 0;
-    }
-
-    size() {
-        return this.cards.length;
-    }
-
-    setCards(cards) {
-        this.cards = cards;
-    }
-}
-
 class Game {
     constructor() {
         this.deck = new Deck();
         this.tableau = new Tableau();
-        this.stock = new Stock();
         this.stackElement = [
             document.getElementById("stack-1"),
             document.getElementById("stack-2"),
@@ -58,72 +38,78 @@ class Game {
     newGame() {
         this.deck = new Deck();
         this.tableau.clear();
-        this.stock.setCards([]);
+
+        // Deal initial 4 cards to tableau (face up)
         for (let i = 0; i < 4; i++) {
             const card = this.deck.drawCard();
             if (card) {
-                // Ensure card is face up
-                while (!card.getVisible()) card.flip();
+                this.ensureCardFaceUp(card);
                 this.tableau.addCardToStack(i, card);
             }
         }
-        const remaining = [];
-        while (!this.deck.isEmpty()) {
-            const card = this.deck.drawCard();
-            // Ensure card is face down
-            while (card.getVisible()) card.flip();
-            remaining.push(card);
-        }
-        this.stock.setCards(remaining);
+
+        // Remaining 48 cards stay in deck as stock (face down)
         this.render();
     }
 
     deal() {
+        // Deal 4 cards from main deck (one to each stack)
         for (let i = 0; i < 4; i++) {
-            if (!this.stock.isEmpty()) {
-                const card = this.stock.dealOne();
-                // Ensure card is face up
-                while (!card.getVisible()) card.flip();
+            if (!this.deck.isEmpty()) {
+                const card = this.deck.drawCard();
+                this.ensureCardFaceUp(card);
                 this.tableau.addCardToStack(i, card);
             }
         }
         this.render();
     }
 
+    ensureCardFaceUp(card) {
+        if (!card.getVisible()) card.flip();
+    }
+
+    ensureCardFaceDown(card) {
+        if (card.getVisible()) card.flip();
+    }
+    
+    
     render() {
+        // Render tableau stacks
         for (let i = 0; i < 4; i++) {
-            const stackEl = this.stackElement[i];
-            stackEl.innerHTML = "";
+            const stackElement = this.stackElement[i];
+            stackElement.innerHTML = "";
             const stack = this.tableau.getStack(i);
+
             stack.forEach((card, index) => {
-                const cardEl = document.createElement("img");
+                const cardElement = document.createElement("img");
                 if (card.getVisible()) {
-                    cardEl.src = `assets/${card.getRank()}${card.getSuit()}.png`;
+                    cardElement.src = "assets/" + card.getImageRef();
                 } else {
-                    cardEl.src = "assets/cardBackRed.png";
+                    cardElement.src = "assets/cardBackRed.png";
                 }
-                cardEl.classList.add("card");
-                cardEl.style.top = `${index * 28}px`;
-                cardEl.style.zIndex = index;
-                stackEl.appendChild(cardEl);
+                cardElement.classList.add("card");
+                cardElement.style.top = `${index * 28}px`;
+                cardElement.style.zIndex = index;
+                stackElement.appendChild(cardElement);
             });
         }
-        // Render stockpile as a card back if not empty, otherwise show 'Empty'
+
+        // Render stockpile
         this.stockElement.innerHTML = "";
-        if (!this.stock.isEmpty()) {
+        if (!this.deck.isEmpty()) {
             const stockImg = document.createElement("img");
             stockImg.src = "assets/cardBackRed.png";
-            stockImg.alt = "Stockpile";
             this.stockElement.classList.remove("empty");
             this.stockElement.appendChild(stockImg);
         } else {
             this.stockElement.classList.add("empty");
             this.stockElement.textContent = "Empty";
         }
-    }
+    }p
 }
 
-// --- Initialise the game when the page loads ---
 window.addEventListener("DOMContentLoaded", () => {
     const game = new Game();
 });
+
+
