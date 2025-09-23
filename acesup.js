@@ -466,11 +466,19 @@ class Game {
     }
 
     checkWin() {
-        const allCards = this.tableau.getAllCards();
-        if (allCards.length === 4) {
-            return allCards.every(card => card.getRank() === 'A');
+        // First check: stockpile must be empty
+        if (!this.deck.isEmpty()) {
+            return false;
         }
-        return false;
+        git 
+        for (let i = 0; i < 4; i++) {
+            const stack = this.tableau.getStack(i);
+            if (stack.length !== 1 || stack[0].getRank() !== 'A') {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     checkLoss() {
