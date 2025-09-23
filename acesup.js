@@ -114,6 +114,16 @@ class GameState {
         }
         this.hintCard = null;
         this.hintStack = null;
+        // reset timer display so it shows 0s on new game
+        const timerElement = document.getElementById('timer');
+        if (timerElement) {
+            timerElement.textContent = 'Time: 0s';
+        }
+        // also reset moves display to 0
+        const movesElement = document.getElementById('moves');
+        if (movesElement) {
+            movesElement.textContent = 'Moves: 0';
+        }
     }
 
     selectCard(card, stackIndex) {
@@ -186,6 +196,10 @@ class Game {
         this.messageArea = document.getElementById("message-area");
         this.hintTimeout = null;
         this.hintStockpile = false;
+        
+        // animation helpers
+        this.isAnimating = false;
+        this.dealAnimateCards = new Set();
 
         this.setupEventListeners();
         this.newGame();
@@ -212,6 +226,8 @@ class Game {
             if (card) {
                 this.ensureCardFaceUp(card);
                 this.tableau.addCardToStack(i, card);
+                // mark for deal animation
+                this.dealAnimateCards.add(card);
             }
         }
 
@@ -225,6 +241,7 @@ class Game {
         if (this.deck.isEmpty() || this.gameState.gameWon || this.gameState.gameLost) {
             return;
         }
+        if (this.isAnimating) return;
 
         this.gameState.startGame();
         this.clearHintHighlight();
@@ -237,6 +254,8 @@ class Game {
                 this.ensureCardFaceUp(card);
                 this.tableau.addCardToStack(i, card);
                 dealtCards.push(card);
+                // mark for deal animation
+                this.dealAnimateCards.add(card);
             }
         }
 
@@ -275,13 +294,38 @@ class Game {
             return false;
         }
         if (this.canRemove(topCard, stackIndex)) {
-            this.moveHistory.addMove(new Move('remove', { card: topCard, fromStack: stackIndex }));
-            this.tableau.removeTopCard(stackIndex);
-            this.gameState.incrementMoves();
-            this.render();
-            this.updateButtons();
-            this.checkEndgameConditions();
-            return true;
+            // animate removal before removing the card
+            const stackEl = this.stackElements[stackIndex];
+            const cardImg = stackEl.querySelector('img.card:last-of-type');
+            if (cardImg) {
+                this.isAnimating = true;
+                // add animation class and wait for end
+                cardImg.classList.add('card-remove');
+                
+                const onAnimEnd = () => {
+                    cardImg.removeEventListener('animationend', onAnimEnd);
+                    // perform the state change after animation
+                    this.moveHistory.addMove(new Move('remove', { card: topCard, fromStack: stackIndex }));
+                    this.tableau.removeTopCard(stackIndex);
+                    this.gameState.incrementMoves();
+                    this.gameState.clearSelection();
+                    this.isAnimating = false;
+                    this.render();
+                    this.updateButtons();
+                    this.checkEndgameConditions();
+                };
+                cardImg.addEventListener('animationend', onAnimEnd);
+                
+                return true;
+            } else {
+                this.moveHistory.addMove(new Move('remove', { card: topCard, fromStack: stackIndex }));
+                this.tableau.removeTopCard(stackIndex);
+                this.gameState.incrementMoves();
+                this.render();
+                this.updateButtons();
+                this.checkEndgameConditions();
+                return true;
+            }
         }
         return false;
     }
@@ -305,6 +349,7 @@ class Game {
         if (this.gameState.gameWon || this.gameState.gameLost) {
             return;
         }
+        if (this.isAnimating) return;
         this.gameState.startGame();
         this.clearHintHighlight();
 
@@ -339,6 +384,7 @@ class Game {
         if (this.gameState.gameWon || this.gameState.gameLost) {
             return;
         }
+        if (this.isAnimating) return;
         if (this.gameState.selectedCard) {
             if (this.moveCard(this.gameState.selectedStack, stackIndex)) {
                 this.gameState.clearSelection();
@@ -347,11 +393,14 @@ class Game {
     }
 
     undo() {
+        // disable undo after the game has ended
+        if (this.gameState.gameWon || this.gameState.gameLost) {
+            return;
+        }
+        if (this.isAnimating) return;
         const move = this.moveHistory.getUndoMove();
         if (!move) return;
-        console.log("undid deal!");
-        console.log(move.data);
-
+        
         switch (move.type) {
             case 'deal':
                 for (let i = 3; i >= 0; i--) {
@@ -379,11 +428,13 @@ class Game {
     }
 
     redo() {
+        // disable redo after the game has ended
+        if (this.gameState.gameWon || this.gameState.gameLost) {
+            return;
+        }
+        if (this.isAnimating) return;
         const move = this.moveHistory.getRedoMove();
         if (!move) return;
-
-        console.log("redid deal!");
-        console.log(move.data);
         
         switch (move.type) {
             case 'deal':
@@ -392,6 +443,8 @@ class Game {
                         const card = this.deck.drawCard();
                         this.ensureCardFaceUp(card);
                         this.tableau.addCardToStack(i, card);
+                        // mark for deal animation on redo as well
+                        this.dealAnimateCards.add(card);
                     }
                 }
                 break;
@@ -446,10 +499,22 @@ class Game {
     checkEndgameConditions() {
         if (this.checkWin()) {
             this.gameState.gameWon = true;
+            // stop timer when the game ends
+            if (this.gameState.timer) {
+                clearInterval(this.gameState.timer);
+                this.gameState.timer = null;
+            }
             this.showMessage("Congrats! You won! :D", "success");
+            this.updateButtons();
         } else if (this.checkLoss()) {
             this.gameState.gameLost = true;
-            this.showMessage("Game Over! It's okay, better luck next time :(", "failure");
+            // stop timer when the game ends
+            if (this.gameState.timer) {
+                clearInterval(this.gameState.timer);
+                this.gameState.timer = null;
+            }
+            this.showMessage("Game Over! It's okay, better luck next time!", "failure");
+            this.updateButtons();
         }
     }
 
@@ -484,6 +549,13 @@ class Game {
         const undoBtn = document.getElementById("undo-btn");
         const redoBtn = document.getElementById("redo-btn");
 
+        // disable undo/redo if the game has ended
+        if (this.gameState.gameWon || this.gameState.gameLost) {
+            if (undoBtn) undoBtn.disabled = true;
+            if (redoBtn) redoBtn.disabled = true;
+            return;
+        }
+
         if (undoBtn) {
             if (this.moveHistory.canUndo()) {
                 undoBtn.disabled = false;
@@ -508,7 +580,8 @@ class Game {
             const stack = this.tableau.getStack(i);
 
             if (stack.length === 0) {
-                stackElement.addEventListener("click", () => this.handleEmptyStackClick(i));
+                // Ensure single click handler
+                stackElement.onclick = () => this.handleEmptyStackClick(i);
                 const emptyIndicator = document.createElement("div");
                 emptyIndicator.classList.add("empty-indicator");
                 emptyIndicator.textContent = "Empty";
@@ -532,14 +605,24 @@ class Game {
                     if (this.gameState.hintCard === card) {
                         cardElement.classList.add("hint-card");
                     }
+                    // apply deal animation once for newly dealt cards
+                    if (this.dealAnimateCards.has(card)) {
+                        cardElement.classList.add('card-deal');
+                        cardElement.addEventListener('animationend', () => {
+                            cardElement.classList.remove('card-deal');
+                            this.dealAnimateCards.delete(card);
+                        }, { once: true });
+                    }
 
                     if (index === stack.length - 1) {
                         cardElement.style.cursor = "pointer";
-                        cardElement.addEventListener("click", () => this.handleCardClick(card, i));
+                        // Ensure single click handler
+                        cardElement.onclick = () => this.handleCardClick(card, i);
                     }
 
                     stackElement.appendChild(cardElement);
                 });
+                // prevent clicks on non-top cards
             }
         }
 
@@ -569,6 +652,7 @@ class Game {
     }
 
     showHint() {
+        if (this.isAnimating) return;
         this.clearHintHighlight();
 
         for (let i = 0; i < 4; i++) {

@@ -1,12 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap');
+
 html, body {
     height: 100%;
     width: 100%;
     overflow: hidden;
+    margin: 0;
+    padding: 0;
+    font-family: 'Montserrat', sans-serif;
 }
 
 body {
     background: url("assets/bg.png") center center no-repeat;
     background-size: cover;
+    padding-top: 80px;
+}
+
+/* Floating Header */
+#header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px;
+    z-index: 1001;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+#header-left {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+#header-right {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+/* Button Styling */
+button {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button:disabled {
+    background: rgba(255, 255, 255, 0.5);
+    color: #999;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+button:disabled:hover {
+    transform: none;
+}
+
+/* Info Boxes */
+.info-box {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 #game-area {
@@ -14,112 +98,122 @@ body {
     flex-direction: row;
     justify-content: center;
     align-items: flex-start;
-    gap: 40px;
+    gap: 50px;
+    padding-top: 40px;
 }
 
 #tableau {
     display: flex;
     flex-direction: row;
-    gap: 32px;
-    margin: 40px 0 0 0;
+    gap: 40px;
 }
 
 .stack {
     position: relative;
-    width: 80px;
-    height: 350px;
+    width: 100px;
+    height: 438px;
     background: rgba(255,255,255,0.05);
-    border-radius: 10px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .card {
     position: absolute;
     left: 0;
-    width: 80px;
+    width: 100px;
     height: auto;
     max-width: 100%;
     display: block;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+    border-radius: 10px;
     transition: all 0.3s ease;
     z-index: 1;
 }
 
 .stack.empty-target {
     background: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 #stock {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-left: 40px;
+    margin-left: 50px;
 }
 
 #stockpile {
-    width: 80px;
-    height: 120px;
+    width: 100px;
+    height: 150px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: none;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    margin-top: 40px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    margin-top: 0;
     position: relative;
+    border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 #stockpile img {
-    width: 80px;
+    width: 100px;
     height: auto;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.25);
 }
 
 #stockpile.empty {
-    background: rgba(255,255,255,0.2);
-    color: #333;
-    font-weight: bold;
-    font-size: 1.1em;
+    background: rgba(255,255,255,0.1);
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+    font-size: 14px;
+    font-family: 'Montserrat', sans-serif;
 }
 
 #stock-counter {
     position: absolute;
-    top: -8px;
-    right: -8px;
-    background: rgba(0, 0, 0, 0.8);
+    top: -10px;
+    right: -10px;
+    background: rgba(0, 0, 0, 0.9);
     color: white;
-    font-size: 12px;
-    font-weight: bold;
-    padding: 4px 6px;
-    border-radius: 10px;
-    min-width: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Montserrat', sans-serif;
+    padding: 6px 8px;
+    border-radius: 12px;
+    min-width: 24px;
     text-align: center;
     pointer-events: none;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.4);
     z-index: 10;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .empty-indicator {
     width: 100%;
     height: 100%;
-    border: 2px dashed rgba(255, 255, 255, 0.3);
-    border-radius: 8px;
+    border: 2px dashed rgba(255, 255, 255, 0.4);
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
 }
 
 .selected-card {
-    filter: brightness(1.3) drop-shadow(0 0 10px yellow);
+    filter: brightness(1.3) drop-shadow(0 0 12px yellow);
+    transform: translateY(-3px);
 }
 
 .hint-card {
-    filter: brightness(1.3) drop-shadow(0 0 10px #ff5640);
+    filter: brightness(1.3) drop-shadow(0 0 12px #ff5640);
+    transform: translateY(-3px);
 }
 
 #message-area {
@@ -127,13 +221,17 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.95);
     color: white;
-    padding: 20px;
-    border-radius: 10px;
-    font-size: 18px;
+    padding: 25px 35px;
+    border-radius: 12px;
+    font-size: 20px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
     text-align: center;
-    z-index: 1000;
+    z-index: 1002;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .hidden {
@@ -141,8 +239,43 @@ body {
 }
 
 #message-area.success {
-    background: rgba(0, 150, 0, 0.9);
+    background: rgba(34, 139, 34, 0.95);
+    border-color: rgba(144, 238, 144, 0.3);
 }
+
 #message-area.failure {
-    background: rgba(150, 0, 0, 0.9);
+    background: rgba(178, 34, 34, 0.95);
+    border-color: rgba(255, 182, 193, 0.3);
+}
+
+
+@keyframes card-deal-anim {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+        filter: brightness(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: brightness(1);
+    }
+}
+
+@keyframes card-remove-anim {
+    to {
+        opacity: 0;
+        transform: translate(60px, -40px) rotate(8deg) scale(0.98);
+        filter: blur(1px) brightness(0.9);
+    }
+}
+
+.card-deal {
+    animation: card-deal-anim 240ms ease-out;
+}
+
+.card-remove {
+    animation: card-remove-anim 220ms ease-in forwards;
+    z-index: 999;
+    pointer-events: none;
 }
