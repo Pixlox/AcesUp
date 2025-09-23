@@ -470,7 +470,7 @@ class Game {
         if (!this.deck.isEmpty()) {
             return false;
         }
-        git 
+        
         for (let i = 0; i < 4; i++) {
             const stack = this.tableau.getStack(i);
             if (stack.length !== 1 || stack[0].getRank() !== 'A') {
