@@ -183,7 +183,6 @@ class Game {
             document.getElementById("stack-4")
         ];
         this.stockElement = document.getElementById("stockpile");
-        
         this.messageArea = document.getElementById("message-area");
         this.hintTimeout = null;
         this.hintStockpile = false;
@@ -546,7 +545,6 @@ class Game {
 
         this.stockElement.innerHTML = "";
         if (!this.deck.isEmpty()) {
-
             const stockImg = document.createElement("img");
             stockImg.src = "assets/cardBackRed.png";
 
@@ -556,7 +554,12 @@ class Game {
             }
             this.stockElement.appendChild(stockImg);
 
-            this.stockElement.appendChild(count);
+            // Add stock counter
+            const stockCounter = document.createElement("div");
+            stockCounter.id = "stock-counter";
+            stockCounter.textContent = this.deck.getSize();
+            this.stockElement.appendChild(stockCounter);
+
             this.stockElement.style.cursor = "pointer";
         } else {
             this.stockElement.classList.add("empty");

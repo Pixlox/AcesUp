@@ -42,7 +42,7 @@ body {
     display: block;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     border-radius: 8px;
-    transition: top 0.2s;
+    transition: all 0.3s ease;
     z-index: 1;
 }
 
@@ -83,6 +83,23 @@ body {
     color: #333;
     font-weight: bold;
     font-size: 1.1em;
+}
+
+#stock-counter {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 4px 6px;
+    border-radius: 10px;
+    min-width: 20px;
+    text-align: center;
+    pointer-events: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    z-index: 10;
 }
 
 .empty-indicator {
@@ -129,4 +146,3 @@ body {
 #message-area.failure {
     background: rgba(150, 0, 0, 0.9);
 }
-

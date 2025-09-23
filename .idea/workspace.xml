@@ -15,7 +15,6 @@
       <change afterPath="$PROJECT_DIR$/../holiday hw/linkedlist.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/acesup.js" beforeDir="false" afterPath="$PROJECT_DIR$/acesup.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cardgame.html" beforeDir="false" afterPath="$PROJECT_DIR$/cardgame.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/deck-v2.js" beforeDir="false" afterPath="$PROJECT_DIR$/deck-v2.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/style.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -127,7 +126,7 @@
       <workItem from="1758287167157" duration="18452000" />
       <workItem from="1758539921146" duration="14950000" />
       <workItem from="1758629168542" duration="335000" />
-      <workItem from="1758629512533" duration="30328000" />
+      <workItem from="1758629512533" duration="32612000" />
     </task>
     <servers />
   </component>
