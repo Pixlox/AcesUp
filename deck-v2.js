@@ -59,4 +59,9 @@ class Deck {
 			return null;
 		}
 	}
+
+	addCardToTop(card) {
+		// adds the card to the top of the deck
+		this.#deck.push(card);
+	}
 }

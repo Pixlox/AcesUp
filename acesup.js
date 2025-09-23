@@ -36,6 +36,56 @@ class Tableau {
     }
 }
 
+class Move {
+    constructor(type, data) {
+        this.type = type;
+        this.data = data;
+    }
+}
+
+class MoveHistory {
+    constructor() {
+        this.undoMoves = [];
+        this.redoMoves = [];
+    }
+
+    addMove(move) {
+        this.undoMoves.push(move);
+        this.redoMoves = [];
+    }
+
+    canUndo() {
+        return this.undoMoves.length > 0;
+    }
+
+    canRedo() {
+        return this.redoMoves.length > 0;
+    }
+
+    getUndoMove() {
+        if (this.canUndo()) {
+            const move = this.undoMoves.pop();
+            this.redoMoves.push(move);
+            return move;
+        }
+        return null;
+    }
+
+    getRedoMove() {
+        if (this.canRedo()) {
+            const move = this.redoMoves.pop();
+            this.undoMoves.push(move);
+            return move;
+        }
+        return null;
+    }
+
+    clear() {
+        this.undoMoves = [];
+        this.redoMoves = [];
+    }
+}
+
 class GameState {
     constructor() {
         this.selectedCard = null;
@@ -46,7 +96,6 @@ class GameState {
         this.gameLost = false;
         this.startTime = null;
         this.timer = null;
-        // hint highlight state
         this.hintCard = null;
         this.hintStack = null;
     }
@@ -63,7 +112,6 @@ class GameState {
             clearInterval(this.timer);
             this.timer = null;
         }
-        // clear any hint state on reset
         this.hintCard = null;
         this.hintStack = null;
     }
@@ -81,6 +129,13 @@ class GameState {
     incrementMoves() {
         this.moves++;
         this.updateMovesDisplay();
+    }
+
+    decrementMoves() {
+        if (this.moves > 0) {
+            this.moves--;
+            this.updateMovesDisplay();
+        }
     }
 
     startGame() {
@@ -120,6 +175,7 @@ class Game {
         this.deck = new Deck();
         this.tableau = new Tableau();
         this.gameState = new GameState();
+        this.moveHistory = new MoveHistory();
         this.stackElements = [
             document.getElementById("stack-1"),
             document.getElementById("stack-2"),
@@ -127,10 +183,9 @@ class Game {
             document.getElementById("stack-4")
         ];
         this.stockElement = document.getElementById("stockpile");
+        
         this.messageArea = document.getElementById("message-area");
-        // timeout handle for autoclearing hint highlight
         this.hintTimeout = null;
-        // highlight state for stockpile when hint suggests dealing
         this.hintStockpile = false;
 
         this.setupEventListeners();
@@ -147,6 +202,7 @@ class Game {
 
     newGame() {
         this.gameState.reset();
+        this.moveHistory.clear();
         this.clearHintHighlight();
         this.hideMessage();
         this.deck = new Deck();
@@ -163,30 +219,36 @@ class Game {
         this.render();
         this.gameState.updateMovesDisplay();
         this.gameState.updateTimeDisplay();
+        this.updateButtons();
     }
 
     deal() {
-        if (this.deck.isEmpty()) {
-            return;
-        }
-
-        if (this.gameState.gameWon || this.gameState.gameLost) {
+        if (this.deck.isEmpty() || this.gameState.gameWon || this.gameState.gameLost) {
             return;
         }
 
         this.gameState.startGame();
         this.clearHintHighlight();
 
+        const dealtCards = [];
+        
         for (let i = 0; i < 4; i++) {
             if (!this.deck.isEmpty()) {
                 const card = this.deck.drawCard();
                 this.ensureCardFaceUp(card);
                 this.tableau.addCardToStack(i, card);
+                dealtCards.push(card);
             }
+        }
+
+        if (dealtCards.length > 0) {
+            this.moveHistory.addMove(new Move('deal', { cards: dealtCards }));
+            this.gameState.incrementMoves();
         }
 
         this.gameState.clearSelection();
         this.render();
+        this.updateButtons();
         this.checkEndgameConditions();
     }
 
@@ -205,24 +267,20 @@ class Game {
 
     canMove(card, fromStack, toStack) {
         const topCard = this.tableau.getTopCard(fromStack);
-        if (topCard !== card) {
-            return false;
-        }
-        return this.tableau.isStackEmpty(toStack);
+        return topCard === card && this.tableau.isStackEmpty(toStack);
     }
 
     removeCard(stackIndex) {
         const topCard = this.tableau.getTopCard(stackIndex);
-        if (!topCard) {
-            return false;
-        }
-        if (topCard.getRank() === 'A') {
+        if (!topCard || topCard.getRank() === 'A') {
             return false;
         }
         if (this.canRemove(topCard, stackIndex)) {
+            this.moveHistory.addMove(new Move('remove', { card: topCard, fromStack: stackIndex }));
             this.tableau.removeTopCard(stackIndex);
             this.gameState.incrementMoves();
             this.render();
+            this.updateButtons();
             this.checkEndgameConditions();
             return true;
         }
@@ -232,10 +290,12 @@ class Game {
     moveCard(fromStack, toStack) {
         const card = this.tableau.getTopCard(fromStack);
         if (this.canMove(card, fromStack, toStack)) {
+            this.moveHistory.addMove(new Move('move', { card: card, fromStack: fromStack, toStack: toStack }));
             const movedCard = this.tableau.removeTopCard(fromStack);
             this.tableau.addCardToStack(toStack, movedCard);
             this.gameState.incrementMoves();
             this.render();
+            this.updateButtons();
             this.checkEndgameConditions();
             return true;
         }
@@ -248,8 +308,6 @@ class Game {
         }
         this.gameState.startGame();
         this.clearHintHighlight();
-
-        const topCard = this.tableau.getTopCard(stackIndex);
 
         if (!this.gameState.selectedCard) {
             if (this.removeCard(stackIndex)) {
@@ -287,6 +345,72 @@ class Game {
                 this.gameState.clearSelection();
             }
         }
+    }
+
+    undo() {
+        const move = this.moveHistory.getUndoMove();
+        if (!move) return;
+        console.log("undid deal!");
+        console.log(move.data);
+
+        switch (move.type) {
+            case 'deal':
+                for (let i = 3; i >= 0; i--) {
+                    if (!this.tableau.isStackEmpty(i)) {
+                        const card = this.tableau.removeTopCard(i);
+                        this.deck.addCardToTop(card);
+                    }
+                }
+                break;
+            case 'remove':
+                this.tableau.addCardToStack(move.data.fromStack, move.data.card);
+                break;
+            case 'move':
+                const card = this.tableau.removeTopCard(move.data.toStack);
+                this.tableau.addCardToStack(move.data.fromStack, card);
+                break;
+        }
+
+        this.gameState.decrementMoves();
+        this.gameState.clearSelection();
+        this.clearHintHighlight();
+        this.render();
+        this.updateButtons();
+        this.checkEndgameConditions();
+    }
+
+    redo() {
+        const move = this.moveHistory.getRedoMove();
+        if (!move) return;
+
+        console.log("redid deal!");
+        console.log(move.data);
+        
+        switch (move.type) {
+            case 'deal':
+                for (let i = 0; i < 4; i++) {
+                    if (!this.deck.isEmpty()) {
+                        const card = this.deck.drawCard();
+                        this.ensureCardFaceUp(card);
+                        this.tableau.addCardToStack(i, card);
+                    }
+                }
+                break;
+            case 'remove':
+                this.tableau.removeTopCard(move.data.fromStack);
+                break;
+            case 'move':
+                const card = this.tableau.removeTopCard(move.data.fromStack);
+                this.tableau.addCardToStack(move.data.toStack, card);
+                break;
+        }
+
+        this.gameState.incrementMoves();
+        this.gameState.clearSelection();
+        this.clearHintHighlight();
+        this.render();
+        this.updateButtons();
+        this.checkEndgameConditions();
     }
 
     checkWin() {
@@ -332,9 +456,8 @@ class Game {
 
     showMessage(text, type) {
         this.messageArea.textContent = text;
-        this.messageArea.className = ""; // reset
-        this.messageArea.classList.add(type); // success / failure
-        this.messageArea.textContent = text;
+        this.messageArea.className = "";
+        this.messageArea.classList.add(type);
         this.messageArea.classList.remove("hidden");
     }
 
@@ -348,13 +471,6 @@ class Game {
         }
     }
 
-    ensureCardFaceDown(card) {
-        if (card.getVisible()) {
-            card.flip();
-        }
-    }
-
-    // clear any active hint highlight and timeout
     clearHintHighlight() {
         if (this.hintTimeout) {
             clearTimeout(this.hintTimeout);
@@ -363,6 +479,27 @@ class Game {
         this.gameState.hintCard = null;
         this.gameState.hintStack = null;
         this.hintStockpile = false;
+    }
+
+    updateButtons() {
+        const undoBtn = document.getElementById("undo-btn");
+        const redoBtn = document.getElementById("redo-btn");
+
+        if (undoBtn) {
+            if (this.moveHistory.canUndo()) {
+                undoBtn.disabled = false;
+            } else {
+                undoBtn.disabled = true;
+            }
+        }
+
+        if (redoBtn) {
+            if (this.moveHistory.canRedo()) {
+                redoBtn.disabled = false;
+            } else {
+                redoBtn.disabled = true;
+            }
+        }
     }
 
     render() {
@@ -377,7 +514,6 @@ class Game {
                 emptyIndicator.classList.add("empty-indicator");
                 emptyIndicator.textContent = "Empty";
                 stackElement.appendChild(emptyIndicator);
-
             } else {
                 stackElement.style.cursor = "default";
                 stack.forEach((card, index) => {
@@ -394,7 +530,6 @@ class Game {
                     if (this.gameState.selectedCard === card) {
                         cardElement.classList.add("selected-card");
                     }
-                    // apply hint highlight if this is the hinted card
                     if (this.gameState.hintCard === card) {
                         cardElement.classList.add("hint-card");
                     }
@@ -411,14 +546,17 @@ class Game {
 
         this.stockElement.innerHTML = "";
         if (!this.deck.isEmpty()) {
+
             const stockImg = document.createElement("img");
             stockImg.src = "assets/cardBackRed.png";
+
             this.stockElement.classList.remove("empty");
-            // if hint is suggesting to deal, highlight stockpile
             if (this.hintStockpile) {
                 stockImg.classList.add("hint-card");
             }
             this.stockElement.appendChild(stockImg);
+
+            this.stockElement.appendChild(count);
             this.stockElement.style.cursor = "pointer";
         } else {
             this.stockElement.classList.add("empty");
@@ -428,17 +566,14 @@ class Game {
     }
 
     showHint() {
-        // clear previous hint highlight if any
         this.clearHintHighlight();
 
         for (let i = 0; i < 4; i++) {
             const topCard = this.tableau.getTopCard(i);
             if (topCard && this.canRemove(topCard, i)) {
-                // highlight the suggested removable card
                 this.gameState.hintCard = topCard;
                 this.gameState.hintStack = i;
                 this.render();
-                // auto-clear highlight after a short duration
                 this.hintTimeout = setTimeout(() => {
                     this.clearHintHighlight();
                     this.render();
@@ -451,7 +586,6 @@ class Game {
             if (topCard) {
                 for (let toStack = 0; toStack < 4; toStack++) {
                     if (fromStack !== toStack && this.canMove(topCard, fromStack, toStack)) {
-                        // highlight the card to move
                         this.gameState.hintCard = topCard;
                         this.gameState.hintStack = fromStack;
                         this.render();
@@ -464,7 +598,6 @@ class Game {
                 }
             }
         }
-        // if we get here, highlight the stockpile
         if (!this.deck.isEmpty()) {
             this.hintStockpile = true;
             this.render();
@@ -473,14 +606,6 @@ class Game {
                 this.render();
             }, 2000);
         }
-    }
-
-    undo() {
-        this.showMessage("Undo feature not yet implemented", "info");
-    }
-
-    redo() {
-        this.showMessage("Redo feature not yet implemented", "info");
     }
 }
 
