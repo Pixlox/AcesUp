@@ -466,7 +466,7 @@ class Game {
     }
 
     checkWin() {
-        // First check: stockpile must be empty
+        // stockpile must be empty
         if (!this.deck.isEmpty()) {
             return false;
         }
