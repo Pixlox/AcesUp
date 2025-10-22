@@ -1,6 +1,8 @@
 class Tableau {
     constructor(numStacks = 4) {
         this.stacks = [];
+
+        // initialize empty stacks for the tableau
         for (let i = 0; i < numStacks; i++) {
             this.stacks[i] = [];
         }
@@ -16,6 +18,7 @@ class Tableau {
 
     getTopCard(stackIndex) {
         const stack = this.stacks[stackIndex];
+        // return top card or null if stack is empty
         return stack.length > 0 ? stack[stack.length - 1] : null;
     }
 
@@ -28,6 +31,7 @@ class Tableau {
     }
 
     clear() {
+        // empty all stacks without creating new arrays
         this.stacks.forEach(stack => stack.length = 0);
     }
 
@@ -51,6 +55,7 @@ class MoveHistory {
 
     addMove(move) {
         this.undoMoves.push(move);
+        // clear redo stack when new move is made
         this.redoMoves = [];
     }
 
@@ -65,18 +70,22 @@ class MoveHistory {
     getUndoMove() {
         if (this.canUndo()) {
             const move = this.undoMoves.pop();
+            // move to redo stack so it can be redone
             this.redoMoves.push(move);
             return move;
         }
+
         return null;
     }
 
     getRedoMove() {
         if (this.canRedo()) {
             const move = this.redoMoves.pop();
+            // move back to undo stack
             this.undoMoves.push(move);
             return move;
         }
+
         return null;
     }
 
@@ -108,17 +117,21 @@ class GameState {
         this.gameWon = false;
         this.gameLost = false;
         this.startTime = null;
+
         if (this.timer) {
             clearInterval(this.timer);
             this.timer = null;
         }
+
         this.hintCard = null;
         this.hintStack = null;
+
         // reset timer display so it shows 0s on new game
         const timerElement = document.getElementById('timer');
         if (timerElement) {
             timerElement.textContent = 'Time: 0s';
         }
+
         // also reset moves display to 0
         const movesElement = document.getElementById('moves');
         if (movesElement) {
@@ -238,9 +251,11 @@ class Game {
     }
 
     deal() {
+        // can't deal if deck is empty or game is over
         if (this.deck.isEmpty() || this.gameState.gameWon || this.gameState.gameLost) {
             return;
         }
+
         if (this.isAnimating) return;
 
         this.gameState.startGame();
@@ -248,6 +263,7 @@ class Game {
 
         const dealtCards = [];
         
+        // deal one card to each of the 4 stacks
         for (let i = 0; i < 4; i++) {
             if (!this.deck.isEmpty()) {
                 const card = this.deck.drawCard();
@@ -273,30 +289,39 @@ class Game {
     canRemove(card, stackIndex) {
         const cardSuit = card.getSuit();
         const cardValue = card.getValue();
+
+        // check all other stacks for a higher card of the same suit
         for (let i = 0; i < 4; i++) {
             if (i === stackIndex) continue;
+
             const topCard = this.tableau.getTopCard(i);
             if (topCard && topCard.getSuit() === cardSuit && topCard.getValue() > cardValue) {
                 return true;
             }
         }
+
         return false;
     }
 
     canMove(card, fromStack, toStack) {
         const topCard = this.tableau.getTopCard(fromStack);
+        // can only move the top card to an empty stack
         return topCard === card && this.tableau.isStackEmpty(toStack);
     }
 
     removeCard(stackIndex) {
         const topCard = this.tableau.getTopCard(stackIndex);
+
+        // can't remove aces or nonexistent cards
         if (!topCard || topCard.getRank() === 'A') {
             return false;
         }
+
         if (this.canRemove(topCard, stackIndex)) {
             // animate removal before removing the card
             const stackEl = this.stackElements[stackIndex];
             const cardImg = stackEl.querySelector('img.card:last-of-type');
+
             if (cardImg) {
                 this.isAnimating = true;
                 // add animation class and wait for end
@@ -314,8 +339,8 @@ class Game {
                     this.updateButtons();
                     this.checkEndgameConditions();
                 };
+
                 cardImg.addEventListener('animationend', onAnimEnd);
-                
                 return true;
             } else {
                 this.moveHistory.addMove(new Move('remove', { card: topCard, fromStack: stackIndex }));
@@ -327,11 +352,13 @@ class Game {
                 return true;
             }
         }
+
         return false;
     }
 
     moveCard(fromStack, toStack) {
         const card = this.tableau.getTopCard(fromStack);
+
         if (this.canMove(card, fromStack, toStack)) {
             this.moveHistory.addMove(new Move('move', { card: card, fromStack: fromStack, toStack: toStack }));
             const movedCard = this.tableau.removeTopCard(fromStack);
@@ -342,37 +369,47 @@ class Game {
             this.checkEndgameConditions();
             return true;
         }
+
         return false;
     }
 
     handleCardClick(card, stackIndex) {
+        // prevent interaction if game is over or animating
         if (this.gameState.gameWon || this.gameState.gameLost) {
             return;
         }
+
         if (this.isAnimating) return;
+
         this.gameState.startGame();
         this.clearHintHighlight();
 
         if (!this.gameState.selectedCard) {
+            // try to remove card first, otherwise select it
             if (this.removeCard(stackIndex)) {
                 return;
             }
+
             this.gameState.selectCard(card, stackIndex);
             this.render();
         } else {
             if (this.gameState.selectedStack === stackIndex) {
+                // deselect if clicking same card
                 this.gameState.clearSelection();
                 this.render();
             } else {
                 if (this.tableau.isStackEmpty(stackIndex)) {
+                    // try to move selected card to empty stack
                     if (this.moveCard(this.gameState.selectedStack, stackIndex)) {
                         this.gameState.clearSelection();
                     }
                 } else {
+                    // try to remove clicked card, otherwise select it
                     if (this.removeCard(stackIndex)) {
                         this.gameState.clearSelection();
                         return;
                     }
+
                     this.gameState.selectCard(card, stackIndex);
                     this.render();
                 }
@@ -384,7 +421,10 @@ class Game {
         if (this.gameState.gameWon || this.gameState.gameLost) {
             return;
         }
+
         if (this.isAnimating) return;
+
+        // only allow moving to empty stack if card is selected
         if (this.gameState.selectedCard) {
             if (this.moveCard(this.gameState.selectedStack, stackIndex)) {
                 this.gameState.clearSelection();
@@ -397,7 +437,9 @@ class Game {
         if (this.gameState.gameWon || this.gameState.gameLost) {
             return;
         }
+
         if (this.isAnimating) return;
+
         const move = this.moveHistory.getUndoMove();
         if (!move) return;
         
@@ -410,9 +452,11 @@ class Game {
                     }
                 }
                 break;
+
             case 'remove':
                 this.tableau.addCardToStack(move.data.fromStack, move.data.card);
                 break;
+
             case 'move':
                 const card = this.tableau.removeTopCard(move.data.toStack);
                 this.tableau.addCardToStack(move.data.fromStack, card);
@@ -432,7 +476,9 @@ class Game {
         if (this.gameState.gameWon || this.gameState.gameLost) {
             return;
         }
+
         if (this.isAnimating) return;
+
         const move = this.moveHistory.getRedoMove();
         if (!move) return;
         
@@ -448,9 +494,11 @@ class Game {
                     }
                 }
                 break;
+
             case 'remove':
                 this.tableau.removeTopCard(move.data.fromStack);
                 break;
+
             case 'move':
                 const card = this.tableau.removeTopCard(move.data.fromStack);
                 this.tableau.addCardToStack(move.data.toStack, card);
@@ -470,7 +518,8 @@ class Game {
         if (!this.deck.isEmpty()) {
             return false;
         }
-        
+
+        // win - each stack must have exactly one ace
         for (let i = 0; i < 4; i++) {
             const stack = this.tableau.getStack(i);
             if (stack.length !== 1 || stack[0].getRank() !== 'A') {
@@ -482,15 +531,20 @@ class Game {
     }
 
     checkLoss() {
+        // can only lose if stockpile is empty
         if (!this.deck.isEmpty()) {
             return false;
         }
+
+        // check if any card can be removed
         for (let i = 0; i < 4; i++) {
             const topCard = this.tableau.getTopCard(i);
             if (topCard && this.canRemove(topCard, i)) {
                 return false;
             }
         }
+
+        // check if any card can be moved to empty stack
         for (let fromStack = 0; fromStack < 4; fromStack++) {
             const topCard = this.tableau.getTopCard(fromStack);
             if (topCard) {
@@ -501,26 +555,31 @@ class Game {
                 }
             }
         }
+
         return true;
     }
 
     checkEndgameConditions() {
         if (this.checkWin()) {
             this.gameState.gameWon = true;
+
             // stop timer when the game ends
             if (this.gameState.timer) {
                 clearInterval(this.gameState.timer);
                 this.gameState.timer = null;
             }
+
             this.showMessage("Congrats! You won! :D", "success");
             this.updateButtons();
         } else if (this.checkLoss()) {
             this.gameState.gameLost = true;
+
             // stop timer when the game ends
             if (this.gameState.timer) {
                 clearInterval(this.gameState.timer);
                 this.gameState.timer = null;
             }
+
             this.showMessage("Game Over! It's okay, better luck next time!", "failure");
             this.updateButtons();
         }
@@ -548,6 +607,7 @@ class Game {
             clearTimeout(this.hintTimeout);
             this.hintTimeout = null;
         }
+
         this.gameState.hintCard = null;
         this.gameState.hintStack = null;
         this.hintStockpile = false;
@@ -582,13 +642,14 @@ class Game {
     }
 
     render() {
+        // render each of the 4 stacks
         for (let i = 0; i < 4; i++) {
             const stackElement = this.stackElements[i];
             stackElement.innerHTML = "";
             const stack = this.tableau.getStack(i);
 
             if (stack.length === 0) {
-                // Ensure single click handler
+                // show empty stack indicator and allow moves to it
                 stackElement.onclick = () => this.handleEmptyStackClick(i);
                 const emptyIndicator = document.createElement("div");
                 emptyIndicator.classList.add("empty-indicator");
@@ -596,23 +657,29 @@ class Game {
                 stackElement.appendChild(emptyIndicator);
             } else {
                 stackElement.style.cursor = "default";
+
                 stack.forEach((card, index) => {
                     const cardElement = document.createElement("img");
+
                     if (card.getVisible()) {
                         cardElement.src = "assets/" + card.getImageRef();
                     } else {
                         cardElement.src = "assets/cardBackRed.png";
                     }
+
                     cardElement.classList.add("card");
+                    // stack cards with vertical offset for the stack effect
                     cardElement.style.top = `${index * 28}px`;
                     cardElement.style.zIndex = index;
 
                     if (this.gameState.selectedCard === card) {
                         cardElement.classList.add("selected-card");
                     }
+
                     if (this.gameState.hintCard === card) {
                         cardElement.classList.add("hint-card");
                     }
+
                     // apply deal animation once for newly dealt cards
                     if (this.dealAnimateCards.has(card)) {
                         cardElement.classList.add('card-deal');
@@ -622,30 +689,34 @@ class Game {
                         }, { once: true });
                     }
 
+                    // only top card is clickable
                     if (index === stack.length - 1) {
                         cardElement.style.cursor = "pointer";
-                        // Ensure single click handler
+                        // ensure single click handler
                         cardElement.onclick = () => this.handleCardClick(card, i);
                     }
 
                     stackElement.appendChild(cardElement);
                 });
-                // prevent clicks on non-top cards
             }
         }
 
+        // render the stockpile
         this.stockElement.innerHTML = "";
+
         if (!this.deck.isEmpty()) {
             const stockImg = document.createElement("img");
             stockImg.src = "assets/cardBackRed.png";
 
             this.stockElement.classList.remove("empty");
+
             if (this.hintStockpile) {
                 stockImg.classList.add("hint-card");
             }
+
             this.stockElement.appendChild(stockImg);
 
-            // Add stock counter
+            // add stock counter
             const stockCounter = document.createElement("div");
             stockCounter.id = "stock-counter";
             stockCounter.textContent = this.deck.getSize();
@@ -661,41 +732,55 @@ class Game {
 
     showHint() {
         if (this.isAnimating) return;
+
         this.clearHintHighlight();
 
+        // first - look for removable cards
         for (let i = 0; i < 4; i++) {
             const topCard = this.tableau.getTopCard(i);
+
             if (topCard && this.canRemove(topCard, i)) {
                 this.gameState.hintCard = topCard;
                 this.gameState.hintStack = i;
                 this.render();
+
+                // highlight for 2 seconds
                 this.hintTimeout = setTimeout(() => {
                     this.clearHintHighlight();
                     this.render();
                 }, 2000);
+
                 return;
             }
         }
+
+        // second - look for movable cards
         for (let fromStack = 0; fromStack < 4; fromStack++) {
             const topCard = this.tableau.getTopCard(fromStack);
+
             if (topCard) {
                 for (let toStack = 0; toStack < 4; toStack++) {
                     if (fromStack !== toStack && this.canMove(topCard, fromStack, toStack)) {
                         this.gameState.hintCard = topCard;
                         this.gameState.hintStack = fromStack;
                         this.render();
+
                         this.hintTimeout = setTimeout(() => {
                             this.clearHintHighlight();
                             this.render();
                         }, 2000);
+
                         return;
                     }
                 }
             }
         }
+
+        // hint dealing from stockpile, no other moves can be made
         if (!this.deck.isEmpty()) {
             this.hintStockpile = true;
             this.render();
+
             this.hintTimeout = setTimeout(() => {
                 this.clearHintHighlight();
                 this.render();
